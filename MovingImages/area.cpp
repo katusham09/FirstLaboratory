@@ -2,39 +2,48 @@
 
 Area::Area(QWidget *parent):QWidget(parent)
 {
-    setFixedSize(QSize(300,200));
-    myline=new MyLine(80,100,50);
-    myrect=new MyRect(220,100,50);
+    setFixedSize(QSize(300,200)); //создаем холст с фиксированным размером 300x200 пикселей
+    myline=new MyLine(80,100,50); //создаем фигуру - линию
+    myrect=new MyRect(220,100,50); //создаем фигуру - квадрат
     alpha=0;
-}
-void Area::showEvent(QShowEvent *)
-{
-    myTimer=startTimer(50); // создать таймер
-}
-void Area::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
-    painter.setPen(Qt::red);
-    myline->move(alpha,&painter);
-    myrect->move(alpha*(-0.5),&painter);
-}
-void Area::timerEvent(QTimerEvent *event)
-{
-    if (event->timerId() == myTimer) // если наш таймер
-    {
-        alpha=alpha+0.2;
-        update(); // обновить внешний вид
-    }
-    else
-        QWidget::timerEvent(event); // иначе передать для стандартной
-    // обработки
+    //setStyleSheet("border: 2px solid red;");
 }
 
-void Area::hideEvent(QHideEvent *)
+void Area::showEvent(QShowEvent *) //включение таймера
+{
+    myTimer=startTimer(50); // создать таймер
+    //Этот метод вызывается, когда окно становится видимым. В нем создается таймер myTimer, который будет запускать анимацию фигур.
+    //startTimer(50) означает, что таймер будет срабатывать каждые 50 миллисекунд, и это определяет частоту обновления анимации фигур.
+}
+
+void Area::paintEvent(QPaintEvent *)//рисование пошагово перемещающихся фигур
+{
+    QPainter painter(this);//Создает объект QPainter для рисования на виджете
+    painter.setPen(Qt::red);//Устанавливает красный цвет пера для рисования.
+    myline->move(alpha,&painter);//рисуем линию
+    myrect->move(alpha*(-0.5),&painter);//рисуем квадрат. умноженние на -0.5 (для вращения в противоположную сторону и замедления вращения)
+}
+
+void Area::timerEvent(QTimerEvent *event)//инициация перерисовки Холста. Этот метод вызывается при срабатывании таймера myTimer.
+{
+    if (event->timerId() == myTimer) //проверяем, совпадает ли идентификатор таймера, вызвавшего событие, с идентификатором myTimer
+    {//если это наш таймер
+        alpha=alpha+0.2;//увеличиваем угол поворота
+        update(); // обновить внешний вид
+        //Метод update() вызывает метод paintEvent для обновления изображения на экране.
+    }
+    else
+        QWidget::timerEvent(event); // Если идентификатор таймера не совпадает с myTimer, то событие передается для стандартной обработки родительскому классу QWidget
+}
+
+void Area::hideEvent(QHideEvent *)//выключение таймера
 {
     killTimer(myTimer); // уничтожить таймер
+    //когда окно или виджет Area скрывается (например, закрывается или переключается на другое окно),
+    //метод hideEvent вызывается, что приводит к остановке работы таймера myTimer
 }
-Area::~Area()
+
+Area::~Area()//деструктор
 {
     delete myline;
     delete myrect;
